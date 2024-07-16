@@ -1,6 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Render2D;
+using Easing;
 
 namespace FancyPong;
 
@@ -9,25 +12,32 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
+    const int ScreenWidth = 800;
+    const int ScreenHeight = 400;
+
+    Effect playButtonShader;
+
+    bool playing = false;
+    DateTime menuStartTime = DateTime.MinValue;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
+        _graphics.PreferredBackBufferWidth = ScreenWidth;
+        _graphics.PreferredBackBufferHeight = ScreenHeight;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
 
     protected override void Initialize()
     {
-        // TODO: Add your initialization logic here
-
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-
-        // TODO: use this.Content to load your game content here
+        playButtonShader = Content.Load<Effect>("shader");
     }
 
     protected override void Update(GameTime gameTime)
@@ -35,16 +45,28 @@ public class Game1 : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        // TODO: Add your update logic here
+        if (playing)
+        {
+            
+        }
+        else
+        {
+            if (menuStartTime == DateTime.MinValue) menuStartTime = DateTime.Now;
+        }
+
 
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+        Render.graphicsDevice = GraphicsDevice;
+        Render.spriteBatch = _spriteBatch;
+        GraphicsDevice.Clear(Color.Black);
 
-        // TODO: Add your drawing code here
+
+        double time = Ease.Clamp01(Ease.InverseLerp((DateTime.Now-menuStartTime).TotalMilliseconds, 1000, 2000));
+        Render.Circle(new Vector2(ScreenWidth, ScreenHeight)/2, (float)Ease.Lerp(Ease.Smoothstep(time), 0, 25), playButtonShader, new int[] { 0 });
 
         base.Draw(gameTime);
     }
