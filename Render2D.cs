@@ -127,7 +127,9 @@ public static class Render {
 		graphicsDevice.BlendState = BlendState.Opaque;
         graphicsDevice.DepthStencilState = DepthStencilState.None;
         graphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
-		effect.Parameters["WorldViewProjection"].SetValue(Matrix.CreateOrthographicOffCenter(0, graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height, 0f, 0f, 1f));
+		SetValue(effect, "WorldViewProjection", Matrix.CreateOrthographicOffCenter(0, graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height, 0f, 0f, 1f));
+		SetValue(effect, "Radius", radius);
+		SetValue(effect, "CircleCentre", centre);
 
 		foreach (int index in passIndices)
 		{
@@ -142,6 +144,18 @@ public static class Render {
 				pointCount-2
 			);
 		}
+	}
+
+	public static bool SetValue(Effect effect, string name, object value)
+	{
+		if (effect.Parameters[name] == null) return false;
+		if (value is Vector2) effect.Parameters[name].SetValue((Vector2)value);
+		else if (value is Matrix) effect.Parameters[name].SetValue((Matrix)value);
+		else if (value is float) effect.Parameters[name].SetValue((float)value);
+		else if (value is int) effect.Parameters[name].SetValue((int)value);
+		else if (value is bool) effect.Parameters[name].SetValue((bool)value);
+		else return false;
+		return true;
 	}
 
 	/// <summary>

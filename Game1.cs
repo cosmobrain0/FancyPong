@@ -66,6 +66,7 @@ public class Game1 : Game
 
 
         double time = Ease.Clamp01(Ease.InverseLerp((DateTime.Now-menuStartTime).TotalMilliseconds, 1000, 2000));
+		Render.SetValue(playButtonShader, "Time", (float)gameTime.TotalGameTime.TotalMilliseconds);
         Render.Circle(new Vector2(ScreenWidth, ScreenHeight)/2, (float)Ease.Lerp(Ease.Smoothstep(time), 0, 25), playButtonShader, new int[] { 0 });
 
         base.Draw(gameTime);
