@@ -19,6 +19,7 @@ public class Ball
     public Vector2 TargetVelocity { get; set; }
 	public float TargetRadius { get => targetRadius; set => targetRadius = Math.Max(0, value); }
 
+
     float radius;
 
 	public Ball(Vector2 _centre, Vector2 _velocity, float _radius)
@@ -37,7 +38,7 @@ public class Ball
 		Render.Circle(centre, radius, ballShader, new int[] { 0 });
 	}
 
-	public void Update(GameTime gameTime, Vector2 screenSize)
+	public void Update(GameTime gameTime, Vector2 screenSize, Paddle[] paddles)
 	{
 		float dt = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 		
@@ -46,7 +47,7 @@ public class Ball
 		float targetAngle = (float)Math.Atan2(TargetVelocity.Y, TargetVelocity.X);
 
 		speed = MoveTowards(speed, TargetSpeed, acceleration);
-		velocityAngle = MoveTowards(velocityAngle, targetAngle, angularAcceleration);
+		velocityAngle = MoveTowards(velocityAngle, velocityAngle + (float)Ease.AngleDistance(velocityAngle, targetAngle), angularAcceleration);
 		velocity = new Vector2((float)Math.Cos(velocityAngle), (float)Math.Sin(velocityAngle)) * speed;
 		
 		centre += velocity*dt;
@@ -77,6 +78,22 @@ public class Ball
 			centre.X = radius;
 			velocity.X *= -1;
 			TargetVelocity = new Vector2(-TargetVelocity.X, TargetVelocity.Y);
+		}
+
+		foreach (Paddle paddle in paddles)
+		{
+			(Vector2, Vector2)? dataMaybe = paddle.BallCollisionData(centre, radius, velocity);
+			if (dataMaybe != null)
+			{
+				Vector2 normal;
+				Vector2 newPosition;
+				(normal, newPosition) = ((Vector2, Vector2))dataMaybe;
+				velocity = normal / normal.Length() * velocity.Length();
+				// TargetVelocity = velocity / velocity.Length() * TargetSpeed;
+				TargetVelocity = velocity;
+				centre = newPosition;
+				break;
+			}
 		}
 	}
 

@@ -21,6 +21,9 @@ public class Game1 : Game
     DateTime menuStartTime = DateTime.MinValue;
     Ball ball;
 
+    Paddle leftPaddle;
+    Paddle rightPaddle;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -36,6 +39,8 @@ public class Game1 : Game
         ball = new Ball(new Vector2(ScreenWidth, ScreenHeight)/2, new Vector2(0, 0), 25);
         ball.TargetVelocity = new Vector2(0.2f, 0.1f);
         ball.TargetRadius = 15f;
+        leftPaddle = new Paddle(new Vector2(30, ScreenHeight/2), Side.Left);
+        rightPaddle = new Paddle(new Vector2(ScreenWidth-30-Paddle.width, ScreenHeight/2), Side.Right);
     }
 
     protected override void LoadContent()
@@ -51,11 +56,16 @@ public class Game1 : Game
             Exit();
 
         MouseState mouseState = Mouse.GetState();
+        KeyboardState keyboard = Keyboard.GetState();
         Vector2 mouse = new Vector2(mouseState.X, mouseState.Y);
 
         if (playing)
         {
-            ball.Update(gameTime, new Vector2(ScreenWidth, ScreenHeight));
+            ball.Update(gameTime, new Vector2(ScreenWidth, ScreenHeight), new Paddle[] { leftPaddle, rightPaddle });
+            if (keyboard.IsKeyDown(Keys.W)) leftPaddle.MoveUp(0, gameTime);
+            if (keyboard.IsKeyDown(Keys.S)) leftPaddle.MoveDown(ScreenHeight, gameTime);
+            if (keyboard.IsKeyDown(Keys.Up)) rightPaddle.MoveUp(0, gameTime);
+            if (keyboard.IsKeyDown(Keys.Down)) rightPaddle.MoveDown(ScreenHeight, gameTime);
         }
         else
         {
@@ -66,7 +76,6 @@ public class Game1 : Game
                 playing = true;
             }
         }
-
 
         base.Update(gameTime);
     }
@@ -82,6 +91,8 @@ public class Game1 : Game
         if (playing)
         {
             ball.Draw();
+            leftPaddle.Draw();
+            rightPaddle.Draw();
         }
         else
         {
