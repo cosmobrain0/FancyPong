@@ -107,14 +107,14 @@ public static class Render {
 	public static void Circle(Vector2 centre, float radius, Effect effect, int[] passIndices, int pointCount=100)
 	{
 		pointCount = Math.Clamp(pointCount, 3, 255);
-		VertexPositionTexture[] vertices = new VertexPositionTexture[pointCount];
+		VertexPosition[] vertices = new VertexPosition[pointCount];
 		for (int i=0; i<pointCount; i++)
 		{
 			float theta = (i * 2f * (float)Math.PI) / pointCount;
 			Vector2 offset = new Vector2((float)Math.Cos(theta), (float)Math.Sin(theta)) * radius;
 			Vector2 position = centre + offset;
 			// FIXME: normalise position [-1, 1]
-			vertices[i] = new VertexPositionTexture(new Vector3(position.X, position.Y, 0f), (position-offset)/radius);
+			vertices[i] = new VertexPosition(new Vector3(position.X, position.Y, 0f));
 		}
 		short[] indices = new short[3 * (pointCount-2)];
 		for (short triangleIndex=0; triangleIndex < pointCount-2; triangleIndex++)
@@ -124,7 +124,7 @@ public static class Render {
 			indices[triangleIndex*3 + 2] = (short)(triangleIndex+2);
 		}
 
-		graphicsDevice.BlendState = BlendState.Opaque;
+		graphicsDevice.BlendState = BlendState.Additive;
         graphicsDevice.DepthStencilState = DepthStencilState.None;
         graphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
 		SetValue(effect, "WorldViewProjection", Matrix.CreateOrthographicOffCenter(0, graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height, 0f, 0f, 1f));

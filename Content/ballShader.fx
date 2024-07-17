@@ -1,4 +1,4 @@
-﻿#if OPENGL
+#if OPENGL
 	#define VS_SHADERMODEL vs_3_0
 	#define PS_SHADERMODEL ps_3_0
 #else
@@ -11,28 +11,28 @@
 matrix WorldViewProjection;
 float2 CircleCentre;
 float Time;
-float2 ScreenSize;
 float Radius;
-float2 Mouse;
+float2 Velocity;
 
 struct VertexShaderInput
 {
 	float4 Position : POSITION0;
-	float4 Color : COLOR0;
 };
 
 struct VertexShaderOutput
 {
 	float4 Position : SV_POSITION;
-	float4 Color : COLOR0;
 };
 
 VertexShaderOutput MainVS(in VertexShaderInput input)
 {
 	VertexShaderOutput output = (VertexShaderOutput)0;
-
+	float2 uv = (input.Position.xy-CircleCentre)/Radius;
+	float theta = acos(dot(uv, Velocity)/length(Velocity));
+	float halfpi = 3.1415926/2;
+	float radius = 1 + pow((max(theta, halfpi)-halfpi)/halfpi, 12)*length(Velocity)/0.3;
+	input.Position.xy = uv/length(uv) * radius * Radius + CircleCentre;
 	output.Position = mul(input.Position, WorldViewProjection);
-	output.Color = input.Color;
 
 	return output;
 }
@@ -87,40 +87,7 @@ float lerp(float a, float b, float t)
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-	float2 mouseUV = (Mouse-CircleCentre)/Radius;
-	float2 uv = (input.Position.xy-CircleCentre)/Radius;
-	float2 playSignUV = rotate(smoothstep(0, 1, lerp(0.2, 0.8, repeat(Time/3000)))*3.1415926*2/3, uv);
-
-	float backgroundColour = 0;
-	bool colourInverted = false;
-	length(mouseUV);
-	if (length(mouseUV) <= 1)
-	{
-		colourInverted = true;
-		backgroundColour = (1-length(mouseUV-uv))*0.08 + 0.92;
-	}
-
-	float normalisedTheta = repeat((atan2(uv.y, uv.x) + 3.1415926) / (2*3.1415926) + Time/12000);
-	float distance = length(uv);
-	float blackenThing = int(distance > 0.8) * int(distance < 0.9);
-	float validTheta = int(floor(normalisedTheta*24)%2 == 0);
-
-	// with radius 1...
-	float horizontalOffset = smoothstep(0, 1, loop(Time/2000 - 0.25))*0.25 + 0.55;
-	float thirdOffset = horizontalOffset/3;
-	
-	float sideLength = horizontalOffset/sqrt(3) * 2;
-	float leftLine = verticalLine(-thirdOffset, playSignUV);
-	float topLine = gradientLine(float2(-thirdOffset, sideLength/2), float2(thirdOffset*2, 0), playSignUV);
-	float bottomLine = gradientLine(float2(-thirdOffset, -sideLength/2), float2(thirdOffset*2, 0), playSignUV);
-	float playSign = leftLine * (1-topLine) * bottomLine;
-
-	// TODO: IMMEDIATELY: fix the angle line thingy
-	float colour = (1-playSign) * (1-blackenThing*validTheta);
-	colour = 1-colour;
-	colour = colour + backgroundColour;
-	if (colour >= 1 && colourInverted) colour = 0;
- 	return float4(colour, colour, colour, 1);
+	return float4(1, 1, 1, 1);
 }
 
 
@@ -132,3 +99,4 @@ technique BasicColorDrawing
 		PixelShader = compile PS_SHADERMODEL MainPS();
 	}
 };
+
