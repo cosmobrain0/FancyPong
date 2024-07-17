@@ -97,12 +97,11 @@ public static class Render {
 
 	/// <summary>
 	/// Draws a regular shape to approximate a circle (with 100 corners by default)
-	/// <br />
-	/// Can use anywhere between 3 and 255 corners
 	/// </summary>
 	/// <param name="centre">The coordinates of the centre of the circle</param>
 	/// <param name="radius">The radius of the circle</param>
-	/// <param name="colour">The fill colour of the circle</param>
+	/// <param name="effect">The shader/effect to draw with</param>
+	/// <param name="passIndices">The indices of the passes of the effect to draw with, in order</param>
 	/// <param name="pointCount">The number of points of the shape used to approximate the circle. This will be automatically clamped between 3 and 255</param>
 	public static void Circle(Vector2 centre, float radius, Effect effect, int[] passIndices, int pointCount=100)
 	{
