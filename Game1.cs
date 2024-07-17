@@ -64,9 +64,11 @@ public class Game1 : Game
         Render.spriteBatch = _spriteBatch;
         GraphicsDevice.Clear(Color.Black);
 
+        MouseState mouseState = Mouse.GetState();
 
         double time = Ease.Clamp01(Ease.InverseLerp((DateTime.Now-menuStartTime).TotalMilliseconds, 1000, 2000));
 		Render.SetValue(playButtonShader, "Time", (float)gameTime.TotalGameTime.TotalMilliseconds);
+        Render.SetValue(playButtonShader, "Mouse", new Vector2(mouseState.Position.X, _graphics.PreferredBackBufferHeight - mouseState.Position.Y));
         Render.Circle(new Vector2(ScreenWidth, ScreenHeight)/2, (float)Ease.Lerp(Ease.Smoothstep(time), 0, 25), playButtonShader, new int[] { 0 });
 
         base.Draw(gameTime);

@@ -13,6 +13,7 @@ float2 CircleCentre;
 float Time;
 float2 ScreenSize;
 float Radius;
+float2 Mouse;
 
 struct VertexShaderInput
 {
@@ -86,8 +87,18 @@ float lerp(float a, float b, float t)
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
+	float2 mouseUV = (Mouse-CircleCentre)/Radius;
 	float2 uv = (input.Position.xy-CircleCentre)/Radius;
 	float2 playSignUV = rotate(smoothstep(0, 1, lerp(0.2, 0.8, repeat(Time/3000)))*3.1415926*2/3, uv);
+
+	float backgroundColour = 0;
+	bool colourInverted = false;
+	length(mouseUV);
+	if (length(mouseUV) <= 1)
+	{
+		colourInverted = true;
+		backgroundColour = (1-length(mouseUV-uv))*0.08 + 0.92;
+	}
 
 	float normalisedTheta = repeat((atan2(uv.y, uv.x) + 3.1415926) / (2*3.1415926) + Time/12000);
 	float distance = length(uv);
@@ -107,6 +118,8 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 	// TODO: IMMEDIATELY: fix the angle line thingy
 	float colour = (1-playSign) * (1-blackenThing*validTheta);
 	colour = 1-colour;
+	colour = colour + backgroundColour;
+	if (colour >= 1 && colourInverted) colour = 0;
  	return float4(colour, colour, colour, 1);
 }
 
