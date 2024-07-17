@@ -47,6 +47,45 @@ public static class Render {
 	}
 
 	/// <summary>
+	/// Draws an axis-aligned rectangle
+	/// </summary>
+	/// <param name="topLeft">The coordinates of the top-left corner of the rectangle</param>
+	/// <param name="size">The width and height of the rectangle</param>
+	/// <param name="colour">The fill colour of this rectangle</param>
+	public static void Rectangle(Vector2 topLeft, Vector2 size, Effect effect, int[] passIndices)
+	{
+		VertexPosition[] vertices = new VertexPosition[4]
+		{
+			new VertexPosition(new Vector3(topLeft.X, topLeft.Y , 0)),
+			new VertexPosition(new Vector3(topLeft.X+size.X, topLeft.Y, 0)),
+			new VertexPosition(new Vector3(topLeft.X, topLeft.Y+size.Y, 0)),
+			new VertexPosition(new Vector3(topLeft.X+size.X, topLeft.Y+size.Y, 0))
+		};
+		short[] indices = new short[] { 0, 1, 2, 2, 1, 3 };
+
+		graphicsDevice.BlendState = BlendState.Additive;
+        graphicsDevice.DepthStencilState = DepthStencilState.None;
+        graphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
+		SetValue(effect, "WorldViewProjection", Matrix.CreateOrthographicOffCenter(0, graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height, 0f, 0f, 1f));
+		SetValue(effect, "Size", size);
+		SetValue(effect, "TopLeft", new Vector2(topLeft.X, graphicsDevice.Viewport.Height-topLeft.Y));
+
+		foreach (int index in passIndices)
+		{
+	        effect.CurrentTechnique.Passes[index].Apply();
+			graphicsDevice.DrawUserIndexedPrimitives(
+				PrimitiveType.TriangleList,
+				vertices,
+				0,
+				4,
+				indices,
+				0,
+				indices.Length/3
+			);
+		}
+	}
+
+	/// <summary>
 	/// Draws a regular shape to approximate a circle (with 100 corners by default)
 	/// <br />
 	/// Can use anywhere between 3 and 255 corners

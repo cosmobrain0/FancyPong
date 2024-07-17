@@ -89,7 +89,6 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 
 	float backgroundColour = 0;
 	bool colourInverted = false;
-	length(mouseUV);
 	if (length(mouseUV) <= 1)
 	{
 		colourInverted = true;

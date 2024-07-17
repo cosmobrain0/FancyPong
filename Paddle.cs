@@ -14,6 +14,7 @@ public enum Side
 
 public class Paddle
 {
+	public static Effect paddleShader;
 	Vector2 position;
 	public Side side;
 	public const float height = 50;
@@ -40,7 +41,8 @@ public class Paddle
 
 	public void Draw()
 	{
-		Render.Rectangle(new Vector2(position.X, position.Y-height/2), new Vector2(width, height), Color.White);
+		Render.SetValue(paddleShader, "RightSide", side == Side.Right);
+		Render.Rectangle(new Vector2(position.X, position.Y-height/2), new Vector2(width, height), paddleShader, new int[] { 0 });
 	}
 
 	/// <summary>

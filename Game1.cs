@@ -48,6 +48,7 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         playButtonShader = Content.Load<Effect>("playButtonShader");
         Ball.ballShader = Content.Load<Effect>("ballShader");
+        Paddle.paddleShader = Content.Load<Effect>("paddleShader");
     }
 
     protected override void Update(GameTime gameTime)
