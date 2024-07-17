@@ -140,7 +140,7 @@ public class Game1 : Game
 
     private void DrawPlayButton(GameTime gameTime, MouseState mouseState)
     {
-        double time = Ease.Clamp01(Ease.InverseLerp((DateTime.Now - menuStartTime).TotalMilliseconds, 1000, 2000));
+        double time = Ease.Clamp01(Ease.InverseLerp((DateTime.Now - menuStartTime).TotalMilliseconds, 250, 750));
         Render.SetValue(playButtonShader, "Time", (float)gameTime.TotalGameTime.TotalMilliseconds);
         Render.SetValue(playButtonShader, "Mouse", new Vector2(mouseState.Position.X, _graphics.PreferredBackBufferHeight - mouseState.Position.Y));
         Render.Circle(PlayButtonPosition(), PlayButtonRadius(), playButtonShader, new int[] { 0 });
@@ -148,7 +148,7 @@ public class Game1 : Game
 
     private float PlayButtonRadius()
     {
-        double time = Ease.Clamp01(Ease.InverseLerp((DateTime.Now - menuStartTime).TotalMilliseconds, 1000, 2000));
+        double time = Ease.Clamp01(Ease.InverseLerp((DateTime.Now - menuStartTime).TotalMilliseconds, 250, 750));
         return (float)Ease.Lerp(Ease.Smoothstep(time), 0, 25);
     }
 
