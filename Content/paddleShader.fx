@@ -36,7 +36,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
     float2 uv = (input.Position.xy-TopLeft)/Size + float2(0, 1);
     if (RightSide) uv.x = 1-uv.x;
     float x = -4*uv.y*uv.y + 4*uv.y;
-	return float4(1, 1, 1, int(uv.x <= x && uv.x >= x-0.2) + int(uv.x <= x)*0.4);
+	return float4(1, 1, 1, int(uv.x <= x && uv.x >= x-0.2) + int(uv.x <= x)*0.5);
 }
 
 

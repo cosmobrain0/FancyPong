@@ -19,7 +19,7 @@ public class Paddle
 	public Side side;
 	public const float height = 50;
 	public const float width = 10;
-	public const float speed = 0.1f;
+	public const float speed = 0.2f;
 
     public Paddle(Vector2 position, Side side)
     {
@@ -43,6 +43,12 @@ public class Paddle
 	{
 		Render.SetValue(paddleShader, "RightSide", side == Side.Right);
 		Render.Rectangle(new Vector2(position.X, position.Y-height/2), new Vector2(width, height), paddleShader, new int[] { 0 });
+		Vector2 p1 = new Vector2(position.X + (side == Side.Right ? width + 10 : -10), position.Y);
+		Vector2 p2 = new Vector2(position.X + (side == Side.Right ? width : 0), position.Y+height/2);
+		Vector2 p3 = new Vector2(position.X + (side == Side.Right ? width : 0), position.Y-height/2);
+		Render.Triangle(p1, p2, p3, new Color(0.5f, 0.5f, 0.5f));
+		Render.ThinLine(p1, p2, Color.White);
+		Render.ThinLine(p1, p3, Color.White);
 	}
 
 	/// <summary>
@@ -55,22 +61,32 @@ public class Paddle
 	/// <param name="radius">The radius of the ball</param>
 	public (Vector2 normal, Vector2 newPosition)? BallCollisionData(Vector2 centre, float radius, Vector2 velocity)
 	{
-		// TODO: use an quadratic collision surface
-		if (centre.Y != Math.Clamp(centre.Y, position.Y-height/2 - radius, position.Y+height/2 + radius))
-			return null;
-		if (side == Side.Left && velocity.X < 0)
+		const int samples = 100;
+		float bestSqrDistance = float.PositiveInfinity;
+		Vector2 bestPoint = Vector2.Zero;
+		for (int i=0; i<samples; i++)
 		{
-			float x = position.X + width;
-			if (centre.X > x && centre.X-radius <= x) return (Vector2.UnitX, new Vector2(position.X+width+radius, centre.Y));
-			else return null;
+			float percentage = (float)i/samples;
+			Vector2 point = new Vector2(
+				position.X + (4*percentage - 4*percentage*percentage)*width,
+				position.Y - height/2 + percentage*height
+			);
+			float sqrDistance = (point-centre).LengthSquared();
+			if (sqrDistance <= bestSqrDistance)
+			{
+				bestSqrDistance = sqrDistance;
+				bestPoint = point;
+			}
 		}
-		else if (side == Side.Right && velocity.X > 0)
+
+		if (bestSqrDistance <= radius*radius)
 		{
-			float x = position.X;
-			if (centre.X < x && centre.X+radius >= x) return (-Vector2.UnitX, new Vector2(position.X-radius, centre.Y));
-			else return null;
+			Vector2 newPosition = (centre-bestPoint)/(centre-bestPoint).Length() * radius + bestPoint;
+			float normalGradient = width/height * (8*((bestPoint.Y - (position.Y-height/2))/height) - 4);
+			Vector2 normal = side == Side.Right ? new Vector2(-1, normalGradient) : new Vector2(1, normalGradient);
+			return (normal, newPosition);
 		}
-		return null;
+		else return null;
 	}
 }
 

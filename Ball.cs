@@ -7,6 +7,7 @@ using Easing;
 
 namespace FancyPong;
 
+// FEATURE-REQUEST: ball has spin based on the movement/rotation of the paddle upon contact
 public class Ball
 {
 	public static Effect ballShader;
