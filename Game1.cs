@@ -24,6 +24,11 @@ public class Game1 : Game
     Paddle leftPaddle;
     Paddle rightPaddle;
 
+    int leftScore;
+    int rightScore;
+
+    SpriteFont font;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -41,6 +46,8 @@ public class Game1 : Game
         ball.TargetRadius = 15f;
         leftPaddle = new Paddle(new Vector2(30, ScreenHeight/2), Side.Left);
         rightPaddle = new Paddle(new Vector2(ScreenWidth-30-Paddle.width, ScreenHeight/2), Side.Right);
+        leftScore = 0;
+        rightScore = 0;
     }
 
     protected override void LoadContent()
@@ -49,6 +56,7 @@ public class Game1 : Game
         playButtonShader = Content.Load<Effect>("playButtonShader");
         Ball.ballShader = Content.Load<Effect>("ballShader");
         Paddle.paddleShader = Content.Load<Effect>("paddleShader");
+        font = Content.Load<SpriteFont>("font");
     }
 
     protected override void Update(GameTime gameTime)
@@ -62,23 +70,44 @@ public class Game1 : Game
 
         if (playing)
         {
-            ball.Update(gameTime, new Vector2(ScreenWidth, ScreenHeight), new Paddle[] { leftPaddle, rightPaddle });
+            Side? side = ball.Update(gameTime, new Vector2(ScreenWidth, ScreenHeight), new Paddle[] { leftPaddle, rightPaddle });
+            if (side == Side.Right)
+            {
+                leftScore++;
+                playing = false;
+            }
+            else if (side == Side.Left)
+            {
+                rightScore++;
+                playing = false;
+            }
+            
             if (keyboard.IsKeyDown(Keys.W)) leftPaddle.MoveUp(0, gameTime);
             if (keyboard.IsKeyDown(Keys.S)) leftPaddle.MoveDown(ScreenHeight, gameTime);
             if (keyboard.IsKeyDown(Keys.Up)) rightPaddle.MoveUp(0, gameTime);
             if (keyboard.IsKeyDown(Keys.Down)) rightPaddle.MoveDown(ScreenHeight, gameTime);
         }
-        else
+        if (!playing)
         {
             if (menuStartTime == DateTime.MinValue) menuStartTime = DateTime.Now;
             if (mouseState.LeftButton == ButtonState.Pressed && (mouse-PlayButtonPosition()).LengthSquared() <= PlayButtonRadius()*PlayButtonRadius())
             {
-                menuStartTime = DateTime.MinValue;
                 playing = true;
+                Restart();
             }
         }
 
         base.Update(gameTime);
+    }
+
+    void Restart()
+    {
+        menuStartTime = DateTime.MinValue;
+        ball = new Ball(new Vector2(ScreenWidth, ScreenHeight)/2, new Vector2(0, 0), 25);
+        ball.TargetVelocity = new Vector2(0.2f, 0.1f);
+        ball.TargetRadius = 15f;
+        leftPaddle = new Paddle(new Vector2(30, ScreenHeight/2), Side.Left);
+        rightPaddle = new Paddle(new Vector2(ScreenWidth-30-Paddle.width, ScreenHeight/2), Side.Right);
     }
 
     protected override void Draw(GameTime gameTime)
@@ -99,6 +128,12 @@ public class Game1 : Game
         {
             DrawPlayButton(gameTime, mouseState);
         }
+
+        _spriteBatch.Begin();
+        _spriteBatch.DrawString(font, leftScore.ToString(), new Vector2(10, 10), new Color(1, 1, 1, 0.8f));
+        Vector2 size = font.MeasureString(rightScore.ToString());
+        _spriteBatch.DrawString(font, rightScore.ToString(), new Vector2(_graphics.PreferredBackBufferWidth-10-size.X, 10), new Color(1, 1, 1, 0.8f));
+        _spriteBatch.End();
 
         base.Draw(gameTime);
     }

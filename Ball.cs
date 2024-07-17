@@ -39,7 +39,7 @@ public class Ball
 		Render.Circle(centre, radius, ballShader, new int[] { 0 });
 	}
 
-	public void Update(GameTime gameTime, Vector2 screenSize, Paddle[] paddles)
+	public Side? Update(GameTime gameTime, Vector2 screenSize, Paddle[] paddles)
 	{
 		float dt = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 		
@@ -69,17 +69,9 @@ public class Ball
 			TargetVelocity = new Vector2(TargetVelocity.X, -TargetVelocity.Y);
 		}
 		if (centre.X + radius > screenSize.X && velocity.X > 0)
-		{
-			centre.X = screenSize.X-radius;
-			velocity.X *= -1;
-			TargetVelocity = new Vector2(-TargetVelocity.X, TargetVelocity.Y);
-		}
+			return Side.Right;
 		else if (centre.X-radius < 0 && velocity.X < 0)
-		{
-			centre.X = radius;
-			velocity.X *= -1;
-			TargetVelocity = new Vector2(-TargetVelocity.X, TargetVelocity.Y);
-		}
+			return Side.Left;
 
 		foreach (Paddle paddle in paddles)
 		{
@@ -96,6 +88,7 @@ public class Ball
 				break;
 			}
 		}
+		return null;
 	}
 
 	private float MoveTowards(float start, float end, float maxStep)

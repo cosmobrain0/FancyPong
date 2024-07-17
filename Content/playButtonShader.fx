@@ -85,7 +85,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 {
 	float2 mouseUV = (Mouse-CircleCentre)/Radius;
 	float2 uv = (input.Position.xy-CircleCentre)/Radius;
-	float2 playSignUV = rotate(smoothstep(0, 1, lerp(0.2, 0.8, repeat(Time/3000)))*3.1415926*2/3, uv);
+	float2 playSignUV = rotate(smoothstep(0, 1, lerp(0.4, 0.6, repeat(Time/3000)))*3.1415926*2/3, uv);
 
 	float backgroundColour = 0;
 	bool colourInverted = false;
