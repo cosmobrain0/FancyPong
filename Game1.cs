@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Render2D;
 using Easing;
+using System.Collections.Generic;
 
 namespace FancyPong;
 
@@ -12,8 +13,8 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
-    const int ScreenWidth = 800;
-    const int ScreenHeight = 400;
+    const int ScreenWidth = 1200;
+    const int ScreenHeight = 600;
 
     Effect playButtonShader;
 
@@ -29,6 +30,8 @@ public class Game1 : Game
 
     SpriteFont font;
 
+    List<CollisionEffect> collisionEffects;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -41,13 +44,14 @@ public class Game1 : Game
     protected override void Initialize()
     {
         base.Initialize();
-        ball = new Ball(new Vector2(ScreenWidth, ScreenHeight)/2, new Vector2(0, 0), 25);
-        ball.TargetVelocity = new Vector2(0.2f, 0.1f);
-        ball.TargetRadius = 15f;
+        ball = new Ball(new Vector2(ScreenWidth, ScreenHeight)/2, new Vector2(0, 0), 40);
+        ball.TargetVelocity = new Vector2(0.3f, 0.15f);
+        ball.TargetRadius = 23f;
         leftPaddle = new Paddle(new Vector2(30, ScreenHeight/2), Side.Left);
         rightPaddle = new Paddle(new Vector2(ScreenWidth-30-Paddle.width, ScreenHeight/2), Side.Right);
         leftScore = 0;
         rightScore = 0;
+        collisionEffects = new List<CollisionEffect>();
     }
 
     protected override void LoadContent()
@@ -57,6 +61,7 @@ public class Game1 : Game
         Ball.ballShader = Content.Load<Effect>("ballShader");
         Paddle.paddleShader = Content.Load<Effect>("paddleShader");
         font = Content.Load<SpriteFont>("font");
+        CollisionEffect.collisionEffectShader = Content.Load<Effect>("collisionEffectShader");
     }
 
     protected override void Update(GameTime gameTime)
@@ -70,7 +75,13 @@ public class Game1 : Game
 
         if (playing)
         {
-            Side? side = ball.Update(gameTime, new Vector2(ScreenWidth, ScreenHeight), new Paddle[] { leftPaddle, rightPaddle });
+            for (int i=collisionEffects.Count-1; i>=0; i--)
+                if (collisionEffects[i].Complete)
+                {
+                    collisionEffects.RemoveAt(i);
+                }
+
+            Side? side = ball.Update(gameTime, new Vector2(ScreenWidth, ScreenHeight), new Paddle[] { leftPaddle, rightPaddle }, TriggerCollision);
             if (side == Side.Right)
             {
                 leftScore++;
@@ -102,12 +113,16 @@ public class Game1 : Game
 
     void Restart()
     {
+        // TODO: remove repetition in Initialize
         menuStartTime = DateTime.MinValue;
-        ball = new Ball(new Vector2(ScreenWidth, ScreenHeight)/2, new Vector2(0, 0), 25);
-        ball.TargetVelocity = new Vector2(0.2f, 0.1f);
-        ball.TargetRadius = 15f;
+        ball = new Ball(new Vector2(ScreenWidth, ScreenHeight)/2, new Vector2(0, 0), 40);
+        ball.TargetVelocity = new Vector2(0.3f, 0.15f);
+        ball.TargetRadius = 23f;
         leftPaddle = new Paddle(new Vector2(30, ScreenHeight/2), Side.Left);
         rightPaddle = new Paddle(new Vector2(ScreenWidth-30-Paddle.width, ScreenHeight/2), Side.Right);
+        leftScore = 0;
+        rightScore = 0;
+        collisionEffects = new List<CollisionEffect>();
     }
 
     protected override void Draw(GameTime gameTime)
@@ -120,6 +135,7 @@ public class Game1 : Game
 
         if (playing)
         {
+            foreach (CollisionEffect effect in collisionEffects) effect.Draw();
             ball.Draw();
             leftPaddle.Draw();
             rightPaddle.Draw();
@@ -130,9 +146,9 @@ public class Game1 : Game
         }
 
         _spriteBatch.Begin();
-        _spriteBatch.DrawString(font, leftScore.ToString(), new Vector2(10, 10), new Color(1, 1, 1, 0.8f));
+        _spriteBatch.DrawString(font, leftScore.ToString(), new Vector2(15, 15), new Color(1, 1, 1, 0.8f));
         Vector2 size = font.MeasureString(rightScore.ToString());
-        _spriteBatch.DrawString(font, rightScore.ToString(), new Vector2(_graphics.PreferredBackBufferWidth-10-size.X, 10), new Color(1, 1, 1, 0.8f));
+        _spriteBatch.DrawString(font, rightScore.ToString(), new Vector2(_graphics.PreferredBackBufferWidth-15-size.X, 15), new Color(1, 1, 1, 0.8f));
         _spriteBatch.End();
 
         base.Draw(gameTime);
@@ -155,5 +171,10 @@ public class Game1 : Game
     private Vector2 PlayButtonPosition()
     {
         return new Vector2(ScreenWidth, ScreenHeight) / 2;
+    }
+
+    public void TriggerCollision(Vector2 location, float maxRadius, TimeSpan duration, Vector2 direction)
+    {
+        collisionEffects.Add(new CollisionEffect(location, maxRadius, duration, direction));
     }
 }

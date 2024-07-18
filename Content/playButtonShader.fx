@@ -6,8 +6,6 @@
 	#define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-// TODO: figure out how to use the texture coordinate
-
 matrix WorldViewProjection;
 float2 CircleCentre;
 float Time;
@@ -62,8 +60,9 @@ float2 rotate(float theta, float2 v)
 {
 	float c = cos(theta);
 	float s = sin(theta);
-	// TODO: figure out how to use matrices
-	return float2(c*v.x - s*v.y, s*v.x + c*v.y);
+	matrix<float, 2, 2> rotationMatrix = matrix<float, 2, 2>(c, -s, s, c);
+	// return float2(c*v.x - s*v.y, s*v.x + c*v.y);
+	return mul(rotationMatrix, v);
 }
 
 float repeat(float t)

@@ -189,7 +189,7 @@ public static class Render {
 		if (effect.Parameters[name] == null) return false;
 		if (value is Vector2) effect.Parameters[name].SetValue((Vector2)value);
 		else if (value is Matrix) effect.Parameters[name].SetValue((Matrix)value);
-		else if (value is float) effect.Parameters[name].SetValue((float)value);
+		else if (value is float || value is double) effect.Parameters[name].SetValue((float)value);
 		else if (value is int) effect.Parameters[name].SetValue((int)value);
 		else if (value is bool) effect.Parameters[name].SetValue((bool)value);
 		else return false;

@@ -35,11 +35,11 @@ public class Ball
 	public void Draw()
 	{
 		// TODO: finish this
-		Render.SetValue(ballShader, "Velocity", new Vector2(velocity.X, velocity.Y));
-		Render.Circle(centre, radius, ballShader, new int[] { 0 });
+		// Render.SetValue(ballShader, "Velocity", new Vector2(velocity.X, velocity.Y));
+		Render.Circle(centre, radius, Color.White);
 	}
 
-	public Side? Update(GameTime gameTime, Vector2 screenSize, Paddle[] paddles)
+	public Side? Update(GameTime gameTime, Vector2 screenSize, Paddle[] paddles, Action<Vector2, float, TimeSpan, Vector2> triggerCollisionEffect)
 	{
 		float dt = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 		
@@ -79,12 +79,13 @@ public class Ball
 			if (dataMaybe != null)
 			{
 				Vector2 normal;
-				Vector2 newPosition;
-				(normal, newPosition) = ((Vector2, Vector2))dataMaybe;
+				Vector2 collisionPoint;
+				(normal, collisionPoint) = ((Vector2, Vector2))dataMaybe;
 				velocity = normal / normal.Length() * velocity.Length();
 				// TargetVelocity = velocity / velocity.Length() * TargetSpeed;
 				TargetVelocity = velocity;
-				centre = newPosition;
+				centre = collisionPoint + normal/normal.Length() * radius;
+				triggerCollisionEffect(collisionPoint, radius*2, TimeSpan.FromMilliseconds(350), normal);
 				break;
 			}
 		}

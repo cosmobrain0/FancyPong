@@ -17,9 +17,9 @@ public class Paddle
 	public static Effect paddleShader;
 	Vector2 position;
 	public Side side;
-	public const float height = 50;
-	public const float width = 10;
-	public const float speed = 0.2f;
+	public const float height = 75;
+	public const float width = 15;
+	public const float speed = 0.3f;
 
     public Paddle(Vector2 position, Side side)
     {
@@ -59,16 +59,17 @@ public class Paddle
 	/// <summary>
 	/// <param name="centre">The centre of the ball</param>
 	/// <param name="radius">The radius of the ball</param>
-	public (Vector2 normal, Vector2 newPosition)? BallCollisionData(Vector2 centre, float radius, Vector2 velocity)
+	public (Vector2 normal, Vector2 collisionPoint)? BallCollisionData(Vector2 centre, float radius, Vector2 velocity)
 	{
+		// TODO: bounding box check optimisation
 		const int samples = 100;
 		float bestSqrDistance = float.PositiveInfinity;
 		Vector2 bestPoint = Vector2.Zero;
 		for (int i=0; i<samples; i++)
 		{
-			float percentage = (float)i/samples;
+			float percentage = (float)i/(float)samples;
 			Vector2 point = new Vector2(
-				position.X + (4*percentage - 4*percentage*percentage)*width,
+				side == Side.Right ? position.X + width - (4*percentage - 4*percentage*percentage)*width : position.X + (4*percentage - 4*percentage*percentage)*width,
 				position.Y - height/2 + percentage*height
 			);
 			float sqrDistance = (point-centre).LengthSquared();
@@ -81,10 +82,10 @@ public class Paddle
 
 		if (bestSqrDistance <= radius*radius)
 		{
-			Vector2 newPosition = (centre-bestPoint)/(centre-bestPoint).Length() * radius + bestPoint;
+			Vector2 collisionPoint = bestPoint;
 			float normalGradient = width/height * (8*((bestPoint.Y - (position.Y-height/2))/height) - 4);
 			Vector2 normal = side == Side.Right ? new Vector2(-1, normalGradient) : new Vector2(1, normalGradient);
-			return (normal, newPosition);
+			return (normal, collisionPoint);
 		}
 		else return null;
 	}

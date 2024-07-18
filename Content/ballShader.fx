@@ -6,8 +6,6 @@
 	#define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-// TODO: figure out how to use the texture coordinate
-
 matrix WorldViewProjection;
 float2 CircleCentre;
 float Time;
