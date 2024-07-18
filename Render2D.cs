@@ -8,6 +8,8 @@ namespace Render2D;
 public static class Render {
 	public static GraphicsDevice graphicsDevice;
 	public static SpriteBatch spriteBatch;
+	public static float scale = 1;
+	public static Vector2 translation = Vector2.Zero;
 	
 	/// <summary>
 	/// Draws an axis-aligned rectangle
@@ -17,6 +19,8 @@ public static class Render {
 	/// <param name="colour">The fill colour of this rectangle</param>
 	public static void Rectangle(Vector2 topLeft, Vector2 size, Color colour)
 	{
+		topLeft = topLeft*scale + translation;
+		size *= scale;
 		VertexPositionColor[] vertices = new VertexPositionColor[4]
 		{
 			new VertexPositionColor(new Vector3(topLeft.X, topLeft.Y , 0), colour),
@@ -54,6 +58,8 @@ public static class Render {
 	/// <param name="colour">The fill colour of this rectangle</param>
 	public static void Rectangle(Vector2 topLeft, Vector2 size, Effect effect, int[] passIndices)
 	{
+		topLeft = topLeft*scale + translation;
+		size *= scale;
 		VertexPosition[] vertices = new VertexPosition[4]
 		{
 			new VertexPosition(new Vector3(topLeft.X, topLeft.Y , 0)),
@@ -96,6 +102,8 @@ public static class Render {
 	/// <param name="pointCount">The number of points of the shape used to approximate the circle. This will be automatically clamped between 3 and 255</param>
 	public static void Circle(Vector2 centre, float radius, Color colour, int pointCount=100)
 	{
+		centre = centre*scale + translation;
+		radius *= scale;
 		pointCount = Math.Clamp(pointCount, 3, 255);
 		VertexPositionColor[] vertices = new VertexPositionColor[pointCount];
 		for (int i=0; i<pointCount; i++)
@@ -144,6 +152,8 @@ public static class Render {
 	/// <param name="pointCount">The number of points of the shape used to approximate the circle. This will be automatically clamped between 3 and 255</param>
 	public static void Circle(Vector2 centre, float radius, Effect effect, int[] passIndices, int pointCount=100)
 	{
+		centre = centre*scale + translation;
+		radius *= scale;
 		pointCount = Math.Clamp(pointCount, 3, 255);
 		VertexPosition[] vertices = new VertexPosition[pointCount];
 		for (int i=0; i<pointCount; i++)
@@ -206,6 +216,9 @@ public static class Render {
 	/// <param name="colour">The fill colour of this triangle</param>
 	public static void Triangle(Vector2 a, Vector2 b, Vector2 c, Color colour)
 	{
+		a = a*scale + translation;
+		b = b*scale + translation;
+		c = c*scale + translation;
 		VertexPositionColor[] vertices = new VertexPositionColor[3]
 		{
 			new VertexPositionColor(new Vector3(a.X, a.Y, 0), colour),
@@ -242,6 +255,8 @@ public static class Render {
 	/// <param name="colour">The colour of the line</param>
 	public static void ThinLine(Vector2 start, Vector2 end, Color colour)
 	{
+		start = start*scale + translation;
+		end = end*scale + translation;
 		VertexPositionColor[] vertices = new VertexPositionColor[2]
 		{
 			new VertexPositionColor(new Vector3(start.X, start.Y, 0), colour),

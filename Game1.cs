@@ -13,8 +13,11 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
-    const int ScreenWidth = 1200;
-    const int ScreenHeight = 600;
+    const float LogicalScreenWidth = 1200;
+    const float LogicalScreenHeight = 600;
+    const int ScreenWidth = 1600;
+    const int ScreenHeight = 800;
+    public static Matrix transformationMatrix = new Matrix(ScreenWidth/LogicalScreenWidth, 0, 0, 0, 0, ScreenHeight/LogicalScreenHeight, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
     Effect playButtonShader;
 
@@ -44,11 +47,11 @@ public class Game1 : Game
     protected override void Initialize()
     {
         base.Initialize();
-        ball = new Ball(new Vector2(ScreenWidth, ScreenHeight)/2, new Vector2(0, 0), 40);
+        ball = new Ball(new Vector2(LogicalScreenWidth, LogicalScreenHeight)/2, new Vector2(0, 0), 40);
         ball.TargetVelocity = new Vector2(0.3f, 0.15f);
         ball.TargetRadius = 23f;
-        leftPaddle = new Paddle(new Vector2(30, ScreenHeight/2), Side.Left);
-        rightPaddle = new Paddle(new Vector2(ScreenWidth-30-Paddle.width, ScreenHeight/2), Side.Right);
+        leftPaddle = new Paddle(new Vector2(30, LogicalScreenHeight/2), Side.Left);
+        rightPaddle = new Paddle(new Vector2(LogicalScreenWidth-30-Paddle.width, LogicalScreenHeight/2), Side.Right);
         leftScore = 0;
         rightScore = 0;
         collisionEffects = new List<CollisionEffect>();
@@ -71,7 +74,7 @@ public class Game1 : Game
 
         MouseState mouseState = Mouse.GetState();
         KeyboardState keyboard = Keyboard.GetState();
-        Vector2 mouse = new Vector2(mouseState.X, mouseState.Y);
+        Vector2 mouse = new Vector2(mouseState.X * LogicalScreenWidth/ScreenWidth, mouseState.Y * LogicalScreenHeight/ScreenHeight);
 
         if (playing)
         {
@@ -81,7 +84,7 @@ public class Game1 : Game
                     collisionEffects.RemoveAt(i);
                 }
 
-            Side? side = ball.Update(gameTime, new Vector2(ScreenWidth, ScreenHeight), new Paddle[] { leftPaddle, rightPaddle }, TriggerCollision);
+            Side? side = ball.Update(gameTime, new Vector2(LogicalScreenWidth, LogicalScreenHeight), new Paddle[] { leftPaddle, rightPaddle }, TriggerCollision);
             if (side == Side.Right)
             {
                 leftScore++;
@@ -94,9 +97,9 @@ public class Game1 : Game
             }
             
             if (keyboard.IsKeyDown(Keys.W)) leftPaddle.MoveUp(0, gameTime);
-            if (keyboard.IsKeyDown(Keys.S)) leftPaddle.MoveDown(ScreenHeight, gameTime);
+            if (keyboard.IsKeyDown(Keys.S)) leftPaddle.MoveDown(LogicalScreenHeight, gameTime);
             if (keyboard.IsKeyDown(Keys.Up)) rightPaddle.MoveUp(0, gameTime);
-            if (keyboard.IsKeyDown(Keys.Down)) rightPaddle.MoveDown(ScreenHeight, gameTime);
+            if (keyboard.IsKeyDown(Keys.Down)) rightPaddle.MoveDown(LogicalScreenHeight, gameTime);
         }
         if (!playing)
         {
@@ -115,11 +118,11 @@ public class Game1 : Game
     {
         // TODO: remove repetition in Initialize
         menuStartTime = DateTime.MinValue;
-        ball = new Ball(new Vector2(ScreenWidth, ScreenHeight)/2, new Vector2(0, 0), 40);
+        ball = new Ball(new Vector2(LogicalScreenWidth, LogicalScreenHeight)/2, new Vector2(0, 0), 40);
         ball.TargetVelocity = new Vector2(0.3f, 0.15f);
         ball.TargetRadius = 23f;
-        leftPaddle = new Paddle(new Vector2(30, ScreenHeight/2), Side.Left);
-        rightPaddle = new Paddle(new Vector2(ScreenWidth-30-Paddle.width, ScreenHeight/2), Side.Right);
+        leftPaddle = new Paddle(new Vector2(30, LogicalScreenHeight/2), Side.Left);
+        rightPaddle = new Paddle(new Vector2(LogicalScreenWidth-30-Paddle.width, LogicalScreenHeight/2), Side.Right);
         leftScore = 0;
         rightScore = 0;
         collisionEffects = new List<CollisionEffect>();
@@ -129,6 +132,7 @@ public class Game1 : Game
     {
         Render.graphicsDevice = GraphicsDevice;
         Render.spriteBatch = _spriteBatch;
+        Render.scale = ScreenWidth/LogicalScreenWidth;
         GraphicsDevice.Clear(Color.Black);
 
         MouseState mouseState = Mouse.GetState();
@@ -145,7 +149,7 @@ public class Game1 : Game
             DrawPlayButton(gameTime, mouseState);
         }
 
-        _spriteBatch.Begin();
+        _spriteBatch.Begin(transformMatrix: transformationMatrix);
         _spriteBatch.DrawString(font, leftScore.ToString(), new Vector2(15, 15), new Color(1, 1, 1, 0.8f));
         Vector2 size = font.MeasureString(rightScore.ToString());
         _spriteBatch.DrawString(font, rightScore.ToString(), new Vector2(_graphics.PreferredBackBufferWidth-15-size.X, 15), new Color(1, 1, 1, 0.8f));
@@ -170,7 +174,7 @@ public class Game1 : Game
 
     private Vector2 PlayButtonPosition()
     {
-        return new Vector2(ScreenWidth, ScreenHeight) / 2;
+        return new Vector2(LogicalScreenWidth, LogicalScreenHeight) / 2;
     }
 
     public void TriggerCollision(Vector2 location, float maxRadius, TimeSpan duration, Vector2 direction)

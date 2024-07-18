@@ -1,6 +1,6 @@
 # TODO List
 - DONE: when the ball hits something, there should be concentric circles which spawn from the collision point
-- the game should scale well with resolution changes
+- DONE: the game should scale well with resolution changes
 - particles should shoot out from behind the ball as it moves around
 - there should be a dashed line going down the middle of the ball
 - there should be a system for spawning boxes randomly that the ball can hit and "trigger"
