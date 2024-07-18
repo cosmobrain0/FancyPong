@@ -13,6 +13,7 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
+    // NOTE: the logical aspect ratio and the screen aspect ratio *must* be the same
     const float LogicalScreenWidth = 1200;
     const float LogicalScreenHeight = 600;
     const int ScreenWidth = 1600;
