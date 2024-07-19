@@ -124,6 +124,7 @@ public static class Render {
 		BasicEffect effect = new BasicEffect(graphicsDevice)
 		{
 			VertexColorEnabled = true,
+			Alpha=1,
 			Projection = Matrix.CreateOrthographicOffCenter(0, graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height, 0f, 0f, 1f)
 		};
 
@@ -172,12 +173,12 @@ public static class Render {
 			indices[triangleIndex*3 + 2] = (short)(triangleIndex+2);
 		}
 
-		graphicsDevice.BlendState = BlendState.Additive;
+		graphicsDevice.BlendState = BlendState.AlphaBlend;
         graphicsDevice.DepthStencilState = DepthStencilState.None;
         graphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
 		SetValue(effect, "WorldViewProjection", Matrix.CreateOrthographicOffCenter(0, graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height, 0f, 0f, 1f));
 		SetValue(effect, "Radius", radius);
-		SetValue(effect, "CircleCentre", centre);
+		SetValue(effect, "CircleCentre", new Vector2(centre.X, graphicsDevice.Viewport.Height-centre.Y));
 
 		foreach (int index in passIndices)
 		{

@@ -39,7 +39,7 @@ public class Ball
 		Render.Circle(centre, radius, Color.White);
 	}
 
-	public Side? Update(GameTime gameTime, Vector2 screenSize, Paddle[] paddles, Action<Vector2, float, TimeSpan, Vector2> triggerCollisionEffect)
+	public Side? Update(GameTime gameTime, Vector2 screenSize, Paddle[] paddles, Action<Vector2, float, TimeSpan, Vector2> triggerCollisionEffect, Action<Particle> spawnParticle)
 	{
 		float dt = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 		
@@ -73,6 +73,19 @@ public class Ball
 		else if (centre.X-radius < 0 && velocity.X < 0)
 			return Side.Left;
 
+		for (int i=0; i<dt; i++)
+		{
+			float particleRadius = Particle.RandFloat*radius * 0.4f;
+			float position = (Particle.RandFloat*2 - 1)*(radius - particleRadius);
+			Vector2 offset = new Vector2(-velocity.Y, velocity.X);
+			offset = offset/offset.Length() * position;
+			Vector2 particlePosition = centre + offset;
+			Vector2 target = centre - velocity*dt*10;
+			Vector2 particleVelocity = target-particlePosition;
+			particleVelocity = particleVelocity/particleVelocity.Length() * Particle.RandFloat/3;
+			spawnParticle(new Particle(particlePosition, particleVelocity, particleRadius));
+		}
+
 		foreach (Paddle paddle in paddles)
 		{
 			(Vector2, Vector2)? dataMaybe = paddle.BallCollisionData(centre, radius, velocity);
@@ -86,6 +99,14 @@ public class Ball
 				TargetVelocity = velocity;
 				centre = collisionPoint + normal/normal.Length() * radius;
 				triggerCollisionEffect(collisionPoint, radius*2, TimeSpan.FromMilliseconds(350), normal);
+
+				for (int i=0; i<25; i++)
+				{
+					float angle = (float)(Particle.RandFloat*Math.PI - Math.PI/2 + Math.Atan2(normal.Y, normal.X));
+					float particleSpeed = Particle.RandFloat*0.3f;
+					float particleRadius = Particle.RandFloat*radius/6 + radius/2;
+					spawnParticle(new Particle(collisionPoint, new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle))*speed, particleRadius));
+				}
 				break;
 			}
 		}

@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input;
 using Render2D;
 using Easing;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FancyPong;
 
@@ -35,6 +36,7 @@ public class Game1 : Game
     SpriteFont font;
 
     List<CollisionEffect> collisionEffects;
+    List<Particle> particles;
 
     public Game1()
     {
@@ -48,14 +50,15 @@ public class Game1 : Game
     protected override void Initialize()
     {
         base.Initialize();
-        ball = new Ball(new Vector2(LogicalScreenWidth, LogicalScreenHeight)/2, new Vector2(0, 0), 40);
+        ball = new Ball(new Vector2(LogicalScreenWidth, LogicalScreenHeight)/2, new Vector2(0.03f, 0.015f), 40);
         ball.TargetVelocity = new Vector2(0.3f, 0.15f);
-        ball.TargetRadius = 23f;
+        ball.TargetRadius = 8f;
         leftPaddle = new Paddle(new Vector2(30, LogicalScreenHeight/2), Side.Left);
         rightPaddle = new Paddle(new Vector2(LogicalScreenWidth-30-Paddle.width, LogicalScreenHeight/2), Side.Right);
         leftScore = 0;
         rightScore = 0;
         collisionEffects = new List<CollisionEffect>();
+        particles = new List<Particle>();
     }
 
     protected override void LoadContent()
@@ -66,6 +69,7 @@ public class Game1 : Game
         Paddle.paddleShader = Content.Load<Effect>("paddleShader");
         font = Content.Load<SpriteFont>("font");
         CollisionEffect.collisionEffectShader = Content.Load<Effect>("collisionEffectShader");
+        Particle.particleShader = Content.Load<Effect>("particleShader");
     }
 
     protected override void Update(GameTime gameTime)
@@ -85,7 +89,10 @@ public class Game1 : Game
                     collisionEffects.RemoveAt(i);
                 }
 
-            Side? side = ball.Update(gameTime, new Vector2(LogicalScreenWidth, LogicalScreenHeight), new Paddle[] { leftPaddle, rightPaddle }, TriggerCollision);
+            particles.AsParallel().ForAll(x => x.Update(gameTime, new Vector2(LogicalScreenWidth, LogicalScreenHeight)));
+            particles = particles.AsParallel().Where(x => !x.Dead).ToList();
+
+            Side? side = ball.Update(gameTime, new Vector2(LogicalScreenWidth, LogicalScreenHeight), new Paddle[] { leftPaddle, rightPaddle }, TriggerCollision, SpawnParticle);
             if (side == Side.Right)
             {
                 leftScore++;
@@ -119,14 +126,15 @@ public class Game1 : Game
     {
         // TODO: remove repetition in Initialize
         menuStartTime = DateTime.MinValue;
-        ball = new Ball(new Vector2(LogicalScreenWidth, LogicalScreenHeight)/2, new Vector2(0, 0), 40);
+        ball = new Ball(new Vector2(LogicalScreenWidth, LogicalScreenHeight)/2, new Vector2(0.03f, 0.015f), 40);
         ball.TargetVelocity = new Vector2(0.3f, 0.15f);
-        ball.TargetRadius = 23f;
+        ball.TargetRadius = 8f;
         leftPaddle = new Paddle(new Vector2(30, LogicalScreenHeight/2), Side.Left);
         rightPaddle = new Paddle(new Vector2(LogicalScreenWidth-30-Paddle.width, LogicalScreenHeight/2), Side.Right);
         leftScore = 0;
         rightScore = 0;
         collisionEffects = new List<CollisionEffect>();
+        particles = new List<Particle>();
     }
 
     protected override void Draw(GameTime gameTime)
@@ -141,6 +149,7 @@ public class Game1 : Game
         if (playing)
         {
             foreach (CollisionEffect effect in collisionEffects) effect.Draw();
+            foreach (Particle particle in particles) particle.Draw();
             ball.Draw();
             leftPaddle.Draw();
             rightPaddle.Draw();
@@ -153,7 +162,7 @@ public class Game1 : Game
         _spriteBatch.Begin(transformMatrix: transformationMatrix);
         _spriteBatch.DrawString(font, leftScore.ToString(), new Vector2(15, 15), new Color(1, 1, 1, 0.8f));
         Vector2 size = font.MeasureString(rightScore.ToString());
-        _spriteBatch.DrawString(font, rightScore.ToString(), new Vector2(_graphics.PreferredBackBufferWidth-15-size.X, 15), new Color(1, 1, 1, 0.8f));
+        _spriteBatch.DrawString(font, rightScore.ToString(), new Vector2(LogicalScreenWidth-15-size.X, 15), new Color(1, 1, 1, 0.8f));
         _spriteBatch.End();
 
         base.Draw(gameTime);
@@ -181,5 +190,10 @@ public class Game1 : Game
     public void TriggerCollision(Vector2 location, float maxRadius, TimeSpan duration, Vector2 direction)
     {
         collisionEffects.Add(new CollisionEffect(location, maxRadius, duration, direction));
+    }
+
+    public void SpawnParticle(Particle particle)
+    {
+        particles.Add(particle);
     }
 }

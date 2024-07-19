@@ -47,8 +47,8 @@ public class Paddle
 		Vector2 p2 = new Vector2(position.X + (side == Side.Right ? width : 0), position.Y+height/2);
 		Vector2 p3 = new Vector2(position.X + (side == Side.Right ? width : 0), position.Y-height/2);
 		Render.Triangle(p1, p2, p3, new Color(0.5f, 0.5f, 0.5f));
-		Render.ThinLine(p1, p2, Color.White);
-		Render.ThinLine(p1, p3, Color.White);
+		// Render.ThinLine(p1, p2, Color.White);
+		// Render.ThinLine(p1, p3, Color.White);
 	}
 
 	/// <summary>
