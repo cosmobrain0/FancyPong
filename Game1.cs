@@ -38,6 +38,11 @@ public class Game1 : Game
     List<CollisionEffect> collisionEffects;
     List<Particle> particles;
 
+    Effect dashedLineShader;
+    const float dashedLineWidth = 5;
+    const float dashedLineHeight = 15;
+    const float dashedLineGap = 10;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -70,6 +75,7 @@ public class Game1 : Game
         font = Content.Load<SpriteFont>("font");
         CollisionEffect.collisionEffectShader = Content.Load<Effect>("collisionEffectShader");
         Particle.particleShader = Content.Load<Effect>("particleShader");
+        dashedLineShader = Content.Load<Effect>("dashedLineShader");
     }
 
     protected override void Update(GameTime gameTime)
@@ -148,6 +154,7 @@ public class Game1 : Game
 
         if (playing)
         {
+            DrawDashedLine(gameTime);
             foreach (CollisionEffect effect in collisionEffects) effect.Draw();
             foreach (Particle particle in particles) particle.Draw();
             ball.Draw();
@@ -174,6 +181,14 @@ public class Game1 : Game
         Render.SetValue(playButtonShader, "Time", (float)gameTime.TotalGameTime.TotalMilliseconds);
         Render.SetValue(playButtonShader, "Mouse", new Vector2(mouseState.Position.X, _graphics.PreferredBackBufferHeight - mouseState.Position.Y));
         Render.Circle(PlayButtonPosition(), PlayButtonRadius(), playButtonShader, new int[] { 0 });
+    }
+
+    private void DrawDashedLine(GameTime gameTime)
+    {
+        Render.SetValue(dashedLineShader, "LineGap", dashedLineGap);
+        Render.SetValue(dashedLineShader, "LineHeight", dashedLineHeight);
+        Render.SetValue(dashedLineShader, "Time", (float)gameTime.TotalGameTime.TotalMilliseconds);
+        Render.Rectangle(new Vector2(LogicalScreenWidth/2f - dashedLineWidth/2f, 0), new Vector2(dashedLineWidth, LogicalScreenHeight), dashedLineShader, new int[] { 0 });
     }
 
     private float PlayButtonRadius()
