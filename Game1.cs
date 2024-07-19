@@ -46,7 +46,7 @@ public class Game1 : Game
     List<PowerBox> powerBoxes;
 
     DateTime lastPowerBoxSpawn = DateTime.MinValue;
-    readonly TimeSpan timeBetweenSpawns = TimeSpan.FromMilliseconds(5000);
+    readonly TimeSpan timeBetweenSpawns = TimeSpan.FromMilliseconds(7000);
     Random generator;
 
     DateTime speedBoostStart = DateTime.MinValue;

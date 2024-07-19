@@ -1,3 +1,13 @@
+# Description
+The game is Pong: a two player game in which you control paddles (moving them up and down) to prevent a ball from reaching
+the right or left side of the screen. One player controls the left paddle with W/S (for moving up and down respectively),
+and the second player controls the right paddle with the Up and Down arrow keys.
+
+## Differences between FancyPong and normal Pong
+- This game is prettier (it even has particles)
+- The paddles are arched, so you can control which way the ball faces when it bounces off of your paddle
+- Power Boxes spawn randomly which have different effects (right now they're all speed boosts though)
+
 # TODO List
 - DONE: when the ball hits something, there should be concentric circles which spawn from the collision point
 - DONE: the game should scale well with resolution changes
