@@ -3,9 +3,9 @@
 - DONE: the game should scale well with resolution changes
 - DONE: particles should shoot out from behind the ball as it moves around
 - DONE: there should be a dashed line going down the middle of the screen
-- there should be a system for spawning boxes randomly that the ball can hit and "trigger"
-- a "speed box" should make the ball speed up for a certain time then slow down
-- the ball should glow while the speed effect is active
+- DONE: there should be a system for spawning boxes randomly that the ball can hit and "trigger"
+- DONE: a "speed box" should make the ball speed up for a certain time then slow down
+- DONE: the ball should glow while the speed effect is active
 - the ball should somehow show how long is left for the speed effect
 - an "ice box" should freeze both paddles for a certain amount of time
 - there should be some sort of snowflake in the background or something to show that the ice box is active

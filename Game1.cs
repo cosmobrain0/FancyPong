@@ -17,8 +17,8 @@ public class Game1 : Game
     // NOTE: the logical aspect ratio and the screen aspect ratio *must* be the same
     const float LogicalScreenWidth = 1200;
     const float LogicalScreenHeight = 600;
-    const int ScreenWidth = 1600;
-    const int ScreenHeight = 800;
+    const int ScreenWidth = 1800;
+    const int ScreenHeight = 900;
     public static Matrix transformationMatrix = new Matrix(ScreenWidth/LogicalScreenWidth, 0, 0, 0, 0, ScreenHeight/LogicalScreenHeight, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
     Effect playButtonShader;
@@ -43,6 +43,17 @@ public class Game1 : Game
     const float dashedLineHeight = 15;
     const float dashedLineGap = 10;
 
+    List<PowerBox> powerBoxes;
+
+    DateTime lastPowerBoxSpawn = DateTime.MinValue;
+    readonly TimeSpan timeBetweenSpawns = TimeSpan.FromMilliseconds(5000);
+    Random generator;
+
+    DateTime speedBoostStart = DateTime.MinValue;
+    readonly TimeSpan speedBoostDuration = TimeSpan.FromMilliseconds(5000);
+    const float ballNormalSpeed = 0.4f;
+    const float ballSpeedBoostSpeed = 0.8f;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -56,14 +67,23 @@ public class Game1 : Game
     {
         base.Initialize();
         ball = new Ball(new Vector2(LogicalScreenWidth, LogicalScreenHeight)/2, new Vector2(0.03f, 0.015f), 40);
-        ball.TargetVelocity = new Vector2(0.3f, 0.15f);
-        ball.TargetRadius = 8f;
+        ball.TargetVelocity = new Vector2((float)Math.Cos(Math.PI/4f), (float)Math.Sin(Math.PI/4f)) * ballNormalSpeed;
+        ball.TargetRadius = 16f;
         leftPaddle = new Paddle(new Vector2(30, LogicalScreenHeight/2), Side.Left);
         rightPaddle = new Paddle(new Vector2(LogicalScreenWidth-30-Paddle.width, LogicalScreenHeight/2), Side.Right);
         leftScore = 0;
         rightScore = 0;
         collisionEffects = new List<CollisionEffect>();
         particles = new List<Particle>();
+        PowerBox.triggerSpeed = () => {
+            if (speedBoostStart == DateTime.MinValue)
+            {
+                ball.TargetSpeed = ballSpeedBoostSpeed;
+            }
+            speedBoostStart = DateTime.Now;
+        };
+        powerBoxes = new List<PowerBox>();
+        generator = new Random((int) (DateTime.Now.Ticks & 0b11111111111111111111111111111111));
     }
 
     protected override void LoadContent()
@@ -76,6 +96,7 @@ public class Game1 : Game
         CollisionEffect.collisionEffectShader = Content.Load<Effect>("collisionEffectShader");
         Particle.particleShader = Content.Load<Effect>("particleShader");
         dashedLineShader = Content.Load<Effect>("dashedLineShader");
+        PowerBox.speedShader = Content.Load<Effect>("powerSpeedShader");
     }
 
     protected override void Update(GameTime gameTime)
@@ -95,10 +116,34 @@ public class Game1 : Game
                     collisionEffects.RemoveAt(i);
                 }
 
+            for (int i=powerBoxes.Count-1; i>=0; i--)
+            {
+                if (powerBoxes[i].Intersects(ball.Centre, ball.Radius))
+                {
+                    powerBoxes[i].Trigger();
+                    powerBoxes.RemoveAt(i);
+                }
+            }
+
+            if (speedBoostStart + speedBoostDuration <= DateTime.Now && speedBoostStart != DateTime.MinValue)
+            {
+                speedBoostStart = DateTime.MinValue;
+                ball.TargetSpeed = ballNormalSpeed;
+            }
+
+            if (lastPowerBoxSpawn + timeBetweenSpawns <= DateTime.Now)
+            {
+                lastPowerBoxSpawn += timeBetweenSpawns;
+                Vector2 location = new Vector2(generator.NextSingle()*(LogicalScreenWidth-200-PowerBox.sideLength) + 100, generator.NextSingle()*(LogicalScreenHeight - 50) + 25);
+                // TODO: make this random when there are more types
+                PowerBoxType boxType = PowerBoxType.Speed;
+                powerBoxes.Add(new PowerBox(location, boxType));
+            }
+
             particles.AsParallel().ForAll(x => x.Update(gameTime, new Vector2(LogicalScreenWidth, LogicalScreenHeight)));
             particles = particles.AsParallel().Where(x => !x.Dead).ToList();
 
-            Side? side = ball.Update(gameTime, new Vector2(LogicalScreenWidth, LogicalScreenHeight), new Paddle[] { leftPaddle, rightPaddle }, TriggerCollision, SpawnParticle);
+            Side? side = ball.Update(gameTime, new Vector2(LogicalScreenWidth, LogicalScreenHeight), new Paddle[] { leftPaddle, rightPaddle }, speedBoostStart != DateTime.MinValue, TriggerCollision, SpawnParticle);
             if (side == Side.Right)
             {
                 leftScore++;
@@ -134,13 +179,13 @@ public class Game1 : Game
         menuStartTime = DateTime.MinValue;
         ball = new Ball(new Vector2(LogicalScreenWidth, LogicalScreenHeight)/2, new Vector2(0.03f, 0.015f), 40);
         ball.TargetVelocity = new Vector2(0.3f, 0.15f);
-        ball.TargetRadius = 8f;
+        ball.TargetRadius = 16f;
         leftPaddle = new Paddle(new Vector2(30, LogicalScreenHeight/2), Side.Left);
         rightPaddle = new Paddle(new Vector2(LogicalScreenWidth-30-Paddle.width, LogicalScreenHeight/2), Side.Right);
-        leftScore = 0;
-        rightScore = 0;
         collisionEffects = new List<CollisionEffect>();
         particles = new List<Particle>();
+        powerBoxes = new List<PowerBox>();
+        lastPowerBoxSpawn = DateTime.Now;
     }
 
     protected override void Draw(GameTime gameTime)
@@ -157,7 +202,8 @@ public class Game1 : Game
             DrawDashedLine(gameTime);
             foreach (CollisionEffect effect in collisionEffects) effect.Draw();
             foreach (Particle particle in particles) particle.Draw();
-            ball.Draw();
+            foreach (PowerBox powerBox in powerBoxes) powerBox.Draw(gameTime);
+            ball.Draw(speedBoostDuration, speedBoostStart == DateTime.MinValue ? TimeSpan.Zero : DateTime.Now-speedBoostStart, gameTime);
             leftPaddle.Draw();
             rightPaddle.Draw();
         }

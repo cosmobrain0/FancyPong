@@ -9,6 +9,7 @@
 matrix WorldViewProjection;
 float2 CircleCentre;
 float Radius;
+float3 BaseColour;
 
 struct VertexShaderInput
 {
@@ -55,7 +56,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 	float2 uv = (input.Position.xy-CircleCentre)/Radius;
     float colour = 1-length(uv);
     colour *= colour*colour;
-	return float4(0.8, 0.8, 0.8, colour);
+	return float4(BaseColour, colour);
 }
 
 

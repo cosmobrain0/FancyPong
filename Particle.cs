@@ -16,13 +16,15 @@ public class Particle
 	Vector2 position;
 	Vector2 velocity;
 	float radius;
+	Vector3 colour;
 	public bool Dead { get => radius <= 0.01; }
 
-    public Particle(Vector2 position, Vector2 velocity, float radius)
+    public Particle(Vector2 position, Vector2 velocity, float radius, Vector3 colour)
     {
         this.position = position;
         this.velocity = velocity;
         this.radius = radius;
+		this.colour = colour;
     }
 
 	public void Update(GameTime gameTime, Vector2 screenSize)
@@ -56,6 +58,7 @@ public class Particle
 
 	public void Draw()
 	{
+		Render.SetValue(particleShader, "BaseColour", colour);
 		Render.Circle(position, radius, particleShader, new int[] { 0 });
 	}
 }

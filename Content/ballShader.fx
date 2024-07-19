@@ -11,6 +11,8 @@ float2 CircleCentre;
 float Time;
 float Radius;
 float2 Velocity;
+float SpeedBoostDuration;
+float SpeedBoostTime;
 
 struct VertexShaderInput
 {
@@ -25,11 +27,6 @@ struct VertexShaderOutput
 VertexShaderOutput MainVS(in VertexShaderInput input)
 {
 	VertexShaderOutput output = (VertexShaderOutput)0;
-	float2 uv = (input.Position.xy-CircleCentre)/Radius;
-	float theta = acos(dot(uv, Velocity)/length(Velocity));
-	float halfpi = 3.1415926/2;
-	float radius = 1 + pow((max(theta, halfpi)-halfpi)/halfpi, 12)*length(Velocity)/0.3;
-	input.Position.xy = uv/length(uv) * radius * Radius + CircleCentre;
 	output.Position = mul(input.Position, WorldViewProjection);
 
 	return output;
@@ -78,14 +75,41 @@ float loop(float t)
 	return t%1 > 0.5 ? 2 - 2*(t%1) : 2 * (t%1);
 }
 
-float lerp(float a, float b, float t)
+float angleDistance(float start, float end)
 {
-	return saturate((t-a)/(b-a));
+    float diff = (end - start + 3.1415926) % (3.1415926*2) - 3.1415926;
+    return diff < -3.1415926 ? diff + 3.1415926*2 : diff;
 }
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-	return float4(1, 1, 1, 1);
+	float2 uv = (input.Position.xy-CircleCentre)/Radius;
+	float distance = length(uv);
+
+	float3 white = float3(1, 1, 1);
+	float3 gold = float3(242, 235, 12)/255;
+	float3 black = float3(0, 0, 0);
+	// FIXME: test
+	// float3 gold = float3(1, 0, 0);
+
+	float speedBoostPercentage = SpeedBoostTime/SpeedBoostDuration;
+	float k = 5.6;
+	float t = clamp(k * (0.5 - abs(0.5-speedBoostPercentage)), 0, 1) / 2;
+	float goldenRadius = 16 * t * t * (1-t) * (1-t);
+	// FIXME: test 
+	// goldenRadius = speedBoostPercentage;
+
+	float normalisedTheta = atan2(uv.y, uv.x) / (2*3.1415926) + 0.5;
+	normalisedTheta = (normalisedTheta+0.5) % 1;
+	float progressPercentage = 1-speedBoostPercentage;
+	float withinArcDistance = smoothstep(0.11, 0.1, abs(distance-0.8));
+	float withinArcAngle = smoothstep(progressPercentage/2+0.01, progressPercentage/2, abs(progressPercentage/2 - normalisedTheta));
+	float showWhiteProgressBar = withinArcDistance * withinArcAngle * smoothstep(0, 0.01, speedBoostPercentage);
+	
+
+	float colour = smoothstep(goldenRadius, goldenRadius+0.001, distance);
+	
+	return float4(lerp(lerp(gold, white, colour), black, showWhiteProgressBar), 1);
 }
 
 
