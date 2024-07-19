@@ -93,7 +93,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 	// float3 gold = float3(1, 0, 0);
 
 	float speedBoostPercentage = SpeedBoostTime/SpeedBoostDuration;
-	float k = 5.6;
+	float k = 15;
 	float t = clamp(k * (0.5 - abs(0.5-speedBoostPercentage)), 0, 1) / 2;
 	float goldenRadius = 16 * t * t * (1-t) * (1-t);
 	// FIXME: test 
@@ -102,7 +102,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 	float normalisedTheta = atan2(uv.y, uv.x) / (2*3.1415926) + 0.5;
 	normalisedTheta = (normalisedTheta+0.5) % 1;
 	float progressPercentage = 1-speedBoostPercentage;
-	float withinArcDistance = smoothstep(0.11, 0.1, abs(distance-0.8));
+	float withinArcDistance = smoothstep(0.052, 0.05, abs(distance-0.8));
 	float withinArcAngle = smoothstep(progressPercentage/2+0.01, progressPercentage/2, abs(progressPercentage/2 - normalisedTheta));
 	float showWhiteProgressBar = withinArcDistance * withinArcAngle * smoothstep(0, 0.01, speedBoostPercentage);
 	

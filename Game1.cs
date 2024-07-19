@@ -186,6 +186,7 @@ public class Game1 : Game
         particles = new List<Particle>();
         powerBoxes = new List<PowerBox>();
         lastPowerBoxSpawn = DateTime.Now;
+        speedBoostStart = DateTime.MinValue;
     }
 
     protected override void Draw(GameTime gameTime)
