@@ -62,3 +62,15 @@
 /processorParam:DebugMode=Auto
 /build:powerSpeedShader.fx
 
+#begin powerIceShader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:powerIceShader.fx
+
+#begin blurIceShader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:blurIceShader.fx
+

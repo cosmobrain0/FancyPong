@@ -12,12 +12,15 @@ namespace FancyPong;
 public enum PowerBoxType
 {
 	Speed,
+	Ice,
 }
 
 public class PowerBox
 {
 	public static Effect speedShader;
+	public static Effect iceShader;
 	public static Action triggerSpeed;
+	public static Action triggerIce;
 
 	// powerboxes will be square
 	public static readonly float sideLength = 40;
@@ -55,6 +58,7 @@ public class PowerBox
 	{
 		return powerBoxType switch {
 			PowerBoxType.Speed => (speedShader, triggerSpeed),
+			PowerBoxType.Ice => (iceShader, triggerIce),
 		};
 	}
 }

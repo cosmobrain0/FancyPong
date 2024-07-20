@@ -21,6 +21,8 @@ public class Paddle
 	public const float width = 15;
 	public const float speed = 0.3f;
 
+	public Vector2 Position { get => position; }
+
     public Paddle(Vector2 position, Side side)
     {
         this.position = position;

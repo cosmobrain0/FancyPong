@@ -162,7 +162,6 @@ public static class Render {
 			float theta = (i * 2f * (float)Math.PI) / pointCount;
 			Vector2 offset = new Vector2((float)Math.Cos(theta), (float)Math.Sin(theta)) * radius;
 			Vector2 position = centre + offset;
-			// FIXME: normalise position [-1, 1]
 			vertices[i] = new VertexPosition(new Vector3(position.X, position.Y, 0f));
 		}
 		short[] indices = new short[3 * (pointCount-2)];

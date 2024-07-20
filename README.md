@@ -16,9 +16,11 @@ and the second player controls the right paddle with the Up and Down arrow keys.
 - DONE: there should be a system for spawning boxes randomly that the ball can hit and "trigger"
 - DONE: a "speed box" should make the ball speed up for a certain time then slow down
 - DONE: the ball should glow while the speed effect is active
-- the ball should somehow show how long is left for the speed effect
-- an "ice box" should freeze both paddles for a certain amount of time
-- there should be some sort of snowflake in the background or something to show that the ice box is active
-- the indicator should also show how long is left for the ice effect
-- hitting a "speed box" while the speed effect is already active should  reset the timer for the speed box
-- hitting an "ice box" while the ice effect is already active should reset the timer for the ice box
+- DONE: the ball should somehow show how long is left for the speed effect
+- DONE: an "ice box" should freeze both paddles for a certain amount of time
+- DONE: there should be some sort of snowflake in the background or something to show that the ice box is active
+- NOT NEEDED: the indicator should also show how long is left for the ice effect
+- DONE: hitting a "speed box" while the speed effect is already active should  reset the timer for the speed box
+- DONE: hitting an "ice box" while the ice effect is already active should reset the timer for the ice box
+- make this run on web browsers
+- change the bounce particle effects to make them a spread a little less

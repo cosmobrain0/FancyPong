@@ -22,6 +22,7 @@ public class Game1 : Game
     public static Matrix transformationMatrix = new Matrix(ScreenWidth/LogicalScreenWidth, 0, 0, 0, 0, ScreenHeight/LogicalScreenHeight, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
     Effect playButtonShader;
+    Effect blurIceShader;
 
     bool playing = false;
     DateTime menuStartTime = DateTime.MinValue;
@@ -37,6 +38,7 @@ public class Game1 : Game
 
     List<CollisionEffect> collisionEffects;
     List<Particle> particles;
+    List<(Vector2, DateTime)> iceEffectSnowflakes;
 
     Effect dashedLineShader;
     const float dashedLineWidth = 5;
@@ -52,7 +54,10 @@ public class Game1 : Game
     DateTime speedBoostStart = DateTime.MinValue;
     readonly TimeSpan speedBoostDuration = TimeSpan.FromMilliseconds(5000);
     const float ballNormalSpeed = 0.4f;
-    const float ballSpeedBoostSpeed = 0.8f;
+    const float ballSpeedBoostSpeed = 0.6f;
+
+    DateTime paddleIceStart = DateTime.MinValue;
+    readonly TimeSpan paddleIceDuration = TimeSpan.FromMilliseconds(1000);
 
     public Game1()
     {
@@ -82,8 +87,12 @@ public class Game1 : Game
             }
             speedBoostStart = DateTime.Now;
         };
+        PowerBox.triggerIce = () => {
+            paddleIceStart = DateTime.Now;
+        };
         powerBoxes = new List<PowerBox>();
         generator = new Random((int) (DateTime.Now.Ticks & 0b11111111111111111111111111111111));
+        iceEffectSnowflakes = new List<(Vector2, DateTime)>();
     }
 
     protected override void LoadContent()
@@ -97,6 +106,8 @@ public class Game1 : Game
         Particle.particleShader = Content.Load<Effect>("particleShader");
         dashedLineShader = Content.Load<Effect>("dashedLineShader");
         PowerBox.speedShader = Content.Load<Effect>("powerSpeedShader");
+        PowerBox.iceShader = Content.Load<Effect>("powerIceShader");
+        blurIceShader = Content.Load<Effect>("blurIceShader");
     }
 
     protected override void Update(GameTime gameTime)
@@ -110,6 +121,8 @@ public class Game1 : Game
 
         if (playing)
         {
+            bool iced = paddleIceStart + paddleIceDuration > DateTime.Now;
+
             for (int i=collisionEffects.Count-1; i>=0; i--)
                 if (collisionEffects[i].Complete)
                 {
@@ -136,7 +149,7 @@ public class Game1 : Game
                 lastPowerBoxSpawn += timeBetweenSpawns;
                 Vector2 location = new Vector2(generator.NextSingle()*(LogicalScreenWidth-200-PowerBox.sideLength) + 100, generator.NextSingle()*(LogicalScreenHeight - 50) + 25);
                 // TODO: make this random when there are more types
-                PowerBoxType boxType = PowerBoxType.Speed;
+                PowerBoxType boxType = generator.NextInt64()%2 == 0 ? PowerBoxType.Speed : PowerBoxType.Ice;
                 powerBoxes.Add(new PowerBox(location, boxType));
             }
 
@@ -154,11 +167,24 @@ public class Game1 : Game
                 rightScore++;
                 playing = false;
             }
-            
-            if (keyboard.IsKeyDown(Keys.W)) leftPaddle.MoveUp(0, gameTime);
-            if (keyboard.IsKeyDown(Keys.S)) leftPaddle.MoveDown(LogicalScreenHeight, gameTime);
-            if (keyboard.IsKeyDown(Keys.Up)) rightPaddle.MoveUp(0, gameTime);
-            if (keyboard.IsKeyDown(Keys.Down)) rightPaddle.MoveDown(LogicalScreenHeight, gameTime);
+           
+            if (!iced)
+            {
+                if (keyboard.IsKeyDown(Keys.W)) leftPaddle.MoveUp(0, gameTime);
+                if (keyboard.IsKeyDown(Keys.S)) leftPaddle.MoveDown(LogicalScreenHeight, gameTime);
+                if (keyboard.IsKeyDown(Keys.Up)) rightPaddle.MoveUp(0, gameTime);
+                if (keyboard.IsKeyDown(Keys.Down)) rightPaddle.MoveDown(LogicalScreenHeight, gameTime);
+            }
+            else
+            {
+                if (generator.NextSingle() <= 0.4)
+                {
+                    Vector2 leftPosition = leftPaddle.Position + new Vector2(Paddle.width*(generator.NextSingle()-0.5f)*2, Paddle.height*(generator.NextSingle() - 0.5f));
+                    Vector2 rightPosition = rightPaddle.Position + new Vector2(Paddle.width*(generator.NextSingle()-0.5f)*2, Paddle.height*(generator.NextSingle() - 0.5f));
+                    iceEffectSnowflakes.Add((leftPosition, DateTime.Now));
+                    iceEffectSnowflakes.Add((rightPosition, DateTime.Now));
+                }
+            }
         }
         if (!playing)
         {
@@ -194,6 +220,8 @@ public class Game1 : Game
         Render.graphicsDevice = GraphicsDevice;
         Render.spriteBatch = _spriteBatch;
         Render.scale = ScreenWidth/LogicalScreenWidth;
+        bool iced = playing && paddleIceStart + paddleIceDuration > DateTime.Now;
+        // GraphicsDevice.Clear(iced ? new Color(2, 21, 74) : Color.Black);
         GraphicsDevice.Clear(Color.Black);
 
         MouseState mouseState = Mouse.GetState();
@@ -207,6 +235,14 @@ public class Game1 : Game
             ball.Draw(speedBoostDuration, speedBoostStart == DateTime.MinValue ? TimeSpan.Zero : DateTime.Now-speedBoostStart, gameTime);
             leftPaddle.Draw();
             rightPaddle.Draw();
+            for (int i=iceEffectSnowflakes.Count-1; i>=0; i--)
+            {
+                float t = (float)Ease.Clamp01(Ease.InverseLerp((float)(DateTime.Now - iceEffectSnowflakes[i].Item2).TotalMilliseconds, 0, 1000));
+                if (t >= 1)
+                    iceEffectSnowflakes.RemoveAt(i);
+                else
+                    DrawSnowflake(iceEffectSnowflakes[i].Item1, iceEffectSnowflakes[i].Item2, t);
+            }
         }
         else
         {
@@ -220,6 +256,12 @@ public class Game1 : Game
         _spriteBatch.End();
 
         base.Draw(gameTime);
+    }
+
+    private void DrawSnowflake(Vector2 position, DateTime startTime, float t)
+    {
+        Render.SetValue(blurIceShader, "Progress", t);
+        Render.Rectangle(position-Vector2.One*40, new Vector2(80, 80), blurIceShader, new int[] { 0 });
     }
 
     private void DrawPlayButton(GameTime gameTime, MouseState mouseState)

@@ -89,15 +89,11 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 	float3 white = float3(1, 1, 1);
 	float3 gold = float3(242, 235, 12)/255;
 	float3 black = float3(0, 0, 0);
-	// FIXME: test
-	// float3 gold = float3(1, 0, 0);
 
 	float speedBoostPercentage = SpeedBoostTime/SpeedBoostDuration;
 	float k = 15;
 	float t = clamp(k * (0.5 - abs(0.5-speedBoostPercentage)), 0, 1) / 2;
 	float goldenRadius = 16 * t * t * (1-t) * (1-t);
-	// FIXME: test 
-	// goldenRadius = speedBoostPercentage;
 
 	float normalisedTheta = atan2(uv.y, uv.x) / (2*3.1415926) + 0.5;
 	normalisedTheta = (normalisedTheta+0.5) % 1;
