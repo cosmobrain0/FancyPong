@@ -23,4 +23,4 @@ and the second player controls the right paddle with the Up and Down arrow keys.
 - DONE: hitting a "speed box" while the speed effect is already active should  reset the timer for the speed box
 - DONE: hitting an "ice box" while the ice effect is already active should reset the timer for the ice box
 - make this run on web browsers
-- change the bounce particle effects to make them a spread a little less
+- DONE: change the bounce particle effects to make them a spread a little less

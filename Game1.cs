@@ -53,8 +53,8 @@ public class Game1 : Game
 
     DateTime speedBoostStart = DateTime.MinValue;
     readonly TimeSpan speedBoostDuration = TimeSpan.FromMilliseconds(5000);
-    const float ballNormalSpeed = 0.4f;
-    const float ballSpeedBoostSpeed = 0.6f;
+    const float ballNormalSpeed = 0.5f;
+    const float ballSpeedBoostSpeed = 0.7f;
 
     DateTime paddleIceStart = DateTime.MinValue;
     readonly TimeSpan paddleIceDuration = TimeSpan.FromMilliseconds(1000);

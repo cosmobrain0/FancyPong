@@ -109,8 +109,8 @@ public class Ball
 				for (int i=0; i<25; i++)
 				{
 					float angle = (float)(Particle.RandFloat*Math.PI - Math.PI/2 + Math.Atan2(normal.Y, normal.X));
-					float particleSpeed = Particle.RandFloat*0.3f;
-					float particleRadius = Particle.RandFloat*radius/6 + radius/2;
+					float particleSpeed = Particle.RandFloat*0.25f;
+					float particleRadius = Particle.RandFloat*radius/8 + radius/2;
 					spawnParticle(new Particle(collisionPoint, new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle))*speed, particleRadius, colour));
 				}
 				break;
