@@ -6,7 +6,7 @@ and the second player controls the right paddle with the Up and Down arrow keys.
 ## Differences between FancyPong and normal Pong
 - This game is prettier (it even has particles)
 - The paddles are arched, so you can control which way the ball faces when it bounces off of your paddle
-- Power Boxes spawn randomly which have different effects (right now they're all speed boosts though)
+- Power Boxes spawn randomly which have different effects (either speeding the ball up or freezing paddles)
 
 # TODO List
 - DONE: when the ball hits something, there should be concentric circles which spawn from the collision point
@@ -22,5 +22,5 @@ and the second player controls the right paddle with the Up and Down arrow keys.
 - NOT NEEDED: the indicator should also show how long is left for the ice effect
 - DONE: hitting a "speed box" while the speed effect is already active should  reset the timer for the speed box
 - DONE: hitting an "ice box" while the ice effect is already active should reset the timer for the ice box
-- make this run on web browsers
+- CAN'T FIGURE THIS OUT: make this run on web browsers
 - DONE: change the bounce particle effects to make them a spread a little less

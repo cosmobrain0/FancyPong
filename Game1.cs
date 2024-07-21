@@ -147,9 +147,24 @@ public class Game1 : Game
             if (lastPowerBoxSpawn + timeBetweenSpawns <= DateTime.Now)
             {
                 lastPowerBoxSpawn += timeBetweenSpawns;
-                Vector2 location = new Vector2(generator.NextSingle()*(LogicalScreenWidth-200-PowerBox.sideLength) + 100, generator.NextSingle()*(LogicalScreenHeight - 50) + 25);
-                // TODO: make this random when there are more types
+
                 PowerBoxType boxType = generator.NextInt64()%2 == 0 ? PowerBoxType.Speed : PowerBoxType.Ice;
+
+                Vector2 location;
+                float spaceAroundBall = ball.Radius + ball.TargetSpeed*100f;
+                int iterations = 0;
+                do {
+                    location = new Vector2(
+                        generator.NextSingle()*(LogicalScreenWidth-200-PowerBox.sideLength) + 100,
+                        generator.NextSingle()*(LogicalScreenHeight - PowerBox.sideLength)
+                    );
+                    iterations++;
+                } while (
+                    new PowerBox(location, boxType).Intersects(ball.Centre, ball.Radius) ||
+                    ((location-ball.Centre).LengthSquared() <= spaceAroundBall*spaceAroundBall &&
+                        Vector2.Dot((location-ball.Centre), ball.TargetVelocity) >= 0)
+                );
+                if (iterations > 100) Console.WriteLine(iterations);
                 powerBoxes.Add(new PowerBox(location, boxType));
             }
 

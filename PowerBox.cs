@@ -23,7 +23,7 @@ public class PowerBox
 	public static Action triggerIce;
 
 	// powerboxes will be square
-	public static readonly float sideLength = 40;
+	public static readonly float sideLength = 55;
 	Vector2 position;
 	PowerBoxType boxType;
 
